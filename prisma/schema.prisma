@@ -1,0 +1,86 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  MEMBER
+  LIBRARIAN
+}
+
+enum LoanStatus {
+  ACTIVE
+  RETURNED
+  OVERDUE
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(MEMBER)
+  createdAt    DateTime @default(now())
+
+  loans Loan[]
+
+  @@map("users")
+}
+
+model Author {
+  id   String  @id @default(uuid())
+  name String
+  bio  String?
+
+  books BookAuthor[]
+
+  @@map("authors")
+}
+
+model Book {
+  id              String @id @default(uuid())
+  title           String
+  isbn            String @unique
+  publishedYear   Int
+  totalCopies     Int    @default(1)
+  availableCopies Int    @default(1)
+
+  authors BookAuthor[]
+  loans   Loan[]
+
+  @@index([title])
+  @@map("books")
+}
+
+model BookAuthor {
+  bookId   String
+  authorId String
+
+  book   Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author Author @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, authorId])
+  @@map("book_authors")
+}
+
+model Loan {
+  id         String     @id @default(uuid())
+  userId     String
+  bookId     String
+  borrowedAt DateTime   @default(now())
+  dueAt      DateTime
+  returnedAt DateTime?
+  status     LoanStatus @default(ACTIVE)
+
+  user User @relation(fields: [userId], references: [id])
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@index([userId, status])
+  @@map("loans")
+}
