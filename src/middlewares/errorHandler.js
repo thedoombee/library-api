@@ -4,7 +4,7 @@ function errorHandler(err, req, res, next) {
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       status: 'error',
-	  message: err.message,
+	    message: err.message,
       details: err.details || undefined,
     });
   }
