@@ -1,4 +1,4 @@
-const prisma = require('/src/config/database');
+const prisma = require('../../config/database.js');
 
 async function create(data) {
     return prisma.author.create({data});

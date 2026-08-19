@@ -43,7 +43,7 @@ async function findMany({ search, cursor, limit }) {
 
 async function remove(id) {
     await prisma.book.remove({
-        where: {id};
+        where: {id} ,
     })
 }
 

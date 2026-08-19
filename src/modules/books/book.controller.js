@@ -35,4 +35,4 @@ async function deleteBook(req, res, next) {
     }
 }
 
-module.exports = { createBool, getBook, listBooks, deleteBook }
+module.exports = { createBook, getBook, listBooks, deleteBook }

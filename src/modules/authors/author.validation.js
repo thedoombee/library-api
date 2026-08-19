@@ -1,4 +1,4 @@
-import {z} from zod ;
+const {z} = require('zod') ;
 
 const createAuthorSchema = z.object({
     body: z.object({
@@ -10,10 +10,10 @@ const createAuthorSchema = z.object({
 const updateAuthorSchema = z.object({
     params: z.object({
         id: z.string().uuid(),
-    })
+    }),
     body: z.object({
-        name: z.string().min(3).max(200).optinal(),
-        bio: z.string().max(2000).optinal()
+        name: z.string().min(3).max(200).optional(),
+        bio: z.string().max(2000).optional()
     }).strict(),
 })
 

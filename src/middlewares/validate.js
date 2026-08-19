@@ -1,5 +1,5 @@
 const { ValidationError , ServerError } = require("../errors");
-import {z,ZodError} from 'zod';
+const {z,ZodError} = require('zod');
 
 function validate(schema) {
   return (req, res, next) => {
@@ -24,9 +24,9 @@ function validate(schema) {
           error: "Validation failed ",
           details: errorMsg
         })
-      }
-    } else {
+      } else {
       throw new ServerError();
+    } 
       
     }
   };
