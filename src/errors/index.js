@@ -3,4 +3,5 @@ module.exports = {
   NotFoundError: require('./NotFoundError'),
   ConflictError: require('./ConflictError'),
   ValidationError: require('./ValidationError'),
+  ServerError: require('./ServerError')
 };

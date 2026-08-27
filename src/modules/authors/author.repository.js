@@ -26,7 +26,7 @@ async function update(id, data) {
 }
 
 async function remove(id) {
-    return prisma.author.remove({
+    return prisma.author.delete({
         where: {id}
     });
 }

@@ -5,7 +5,7 @@ async function createAuthor(req, res, next) {
         const author = await authorService.createAuthor(req.body);
         res.status(201).json(author);
     } catch (error) {
-        next(err);
+        next(error);
     }
 }
 
@@ -14,7 +14,7 @@ async function getAuthor(req, res, next) {
         const author = await authorService.getAuthor(req.params.id)
         res.status(200).json(author);
     } catch (error) {
-        next(err);
+        next(error);
     }
     
 }
@@ -22,7 +22,7 @@ async function getAuthor(req, res, next) {
 async function listAuthors(req, res, next) {
     try {
         const authors = await authorService.listAuthors();
-        res.status(200).json();
+        res.status(200).json(authors);
     } catch (error) {
         next(err);
     }
@@ -33,7 +33,7 @@ async function updateAuthor(req, res, next) {
         const author = await authorService.updateAuthor(req.params.id, req.body);
         res.status(200).json(author);
     } catch (error) {
-        next(err);
+        next(error);
     }
 }
 
@@ -42,7 +42,7 @@ async function deleteAuthor(req, res, next) {
         await authorService.deleteAuthor(req.params.id);
         res.status(204).send();
     } catch (error) {
-        next(err);
+        next(error);
     } 
 }
 

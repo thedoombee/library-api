@@ -15,5 +15,8 @@ const updateAuthorSchema = z.object({
         name: z.string().min(3).max(200).optional(),
         bio: z.string().max(2000).optional()
     }).strict(),
-})
+});
+
+module.exports = {createAuthorSchema, updateAuthorSchema}; 
+
 

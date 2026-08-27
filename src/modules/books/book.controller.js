@@ -23,7 +23,7 @@ async function listBooks(req, res, next) {
         const books = await bookService.listBooks(req.query);
         res.status(200).json(books);
     } catch (error) {
-        next(err);   
+        next(error);   
     }
 }
 async function deleteBook(req, res, next) {

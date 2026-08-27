@@ -14,7 +14,11 @@ async function getAuthor(id) {
 }
 
 async function listAuthors() {
-    return authorRepository.findAll();
+    const authors = await authorRepository.findAll();
+    if (authors < 1){
+        console.log("Aucun autheur enregistré")
+    }
+    return authors
 }
 
 async function updateAuthor(id, data) {

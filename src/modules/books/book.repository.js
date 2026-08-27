@@ -23,10 +23,10 @@ async function findById(id) {
   });
 }
 
-async function findMany({ search, cursor, limit }) {
+async function findMany({ search, cursor, limit = 20  }) {
   const books = await prisma.book.findMany({
     where: search ? { title: { contains: search, mode: 'insensitive' } } : {},
-    take: limit + 1,
+    take: Number(limit) + 1,
     ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
     orderBy: { title: 'asc' },
     include: { authors: { include: { author: true } } },
