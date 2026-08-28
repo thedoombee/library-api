@@ -6,6 +6,10 @@ const envSchema = z.object({
     JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 caracters '),
     PORT: z.coerce.number(),
     NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+    TOKEN_EXPIRATION: z.string().trim().regex(
+      /^\d+(?:\.\d+)?\s*(?:ms|s|m|h|d|w|y)?$/,
+      'TOKEN_EXPIRATION must be a duration such as "1h" or "20m"'
+    ),
 });
 
 const parsed = envSchema.safeParse(process.env);

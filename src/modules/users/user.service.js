@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken');
 const userRepository = require('./user.repository');
 const { ConflictError, UnauthorizedError } = require('../../errors');
 const env = require('../../config/env');
-
 const SALT_ROUNDS = 10;
 
 
