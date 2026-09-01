@@ -16,16 +16,59 @@ async function main() {
   await prisma.bookAuthor.deleteMany();
   await prisma.book.deleteMany();
   await prisma.author.deleteMany();
+  await prisma.rolePermission.deleteMany();
+  await prisma.userRole.deleteMany();
+  await prisma.permission.deleteMany();
+  await prisma.role.deleteMany();
   await prisma.user.deleteMany();
+
+  const permissions = await Promise.all([
+    ['authors:create', 'Create authors'],
+    ['authors:update', 'Update authors'],
+    ['authors:delete', 'Delete authors'],
+    ['books:create', 'Create books'],
+    ['books:delete', 'Delete books'],
+    ['loans:create', 'Create a loan'],
+    ['loans:read:own', 'Read own loans'],
+    ['loans:return:own', 'Return own loans'],
+    ['loans:read:any', 'Read every loan'],
+    ['loans:return:any', 'Return any loan'],
+  ].map(([code, description]) => prisma.permission.create({ data: { code, description } })));
+
+  const permissionsByCode = Object.fromEntries(permissions.map((permission) => [permission.code, permission.id]));
+  const member = await prisma.role.create({
+    data: {
+      name: 'MEMBER',
+      isDefault: true,
+      permissions: {
+        create: ['loans:create', 'loans:read:own', 'loans:return:own']
+          .map((code) => ({ permissionId: permissionsByCode[code] })),
+      },
+    },
+  });
+  const librarian = await prisma.role.create({
+    data: {
+      name: 'LIBRARIAN',
+      permissions: {
+        create: permissions.map((permission) => ({ permissionId: permission.id })),
+      },
+    },
+  });
 
   const passwordHash = await bcrypt.hash('password123', 10);
 
-  const librarian = await prisma.user.create({
-    data: { email: 'librarian@library.com', passwordHash, name: 'Alice Librarian', role: 'LIBRARIAN' },
+  const librarianUser = await prisma.user.create({
+    data: {
+      email: 'librarian@library.com', passwordHash, name: 'Alice Librarian',
+      userRoles: { create: { roleId: librarian.id } },
+    },
   });
 
-  const member = await prisma.user.create({
-    data: { email: 'member@library.com', passwordHash, name: 'Bob Member', role: 'MEMBER' },
+  const memberUser = await prisma.user.create({
+    data: {
+      email: 'member@library.com', passwordHash, name: 'Bob Member',
+      userRoles: { create: { roleId: member.id } },
+    },
   });
 
   const author = await prisma.author.create({
@@ -43,7 +86,7 @@ async function main() {
     },
   });
 
-  console.log(' Seed completed:', { librarian: librarian.email, member: member.email, book: book.title });
+  console.log(' Seed completed:', { librarian: librarianUser.email, member: memberUser.email, book: book.title });
 }
 
 main()

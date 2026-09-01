@@ -24,7 +24,7 @@ async function listAuthors(req, res, next) {
         const authors = await authorService.listAuthors();
         res.status(200).json(authors);
     } catch (error) {
-        next(err);
+        next(error);
     }
 }
 

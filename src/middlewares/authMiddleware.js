@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
 const env = require('../config/env');
+const prisma = require('../config/database');
 const { UnauthorizedError, ForbiddenError } = require('../errors');
 
-function authenticate(req, res, next) {
+async function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -13,23 +14,55 @@ function authenticate(req, res, next) {
 
   try {
     const payload = jwt.verify(token, env.JWT_SECRET);
-    req.user = { id: payload.sub, role: payload.role }; 
+    const user = await prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: {
+        id: true,
+        userRoles: {
+          select: {
+            role: {
+              select: {
+                permissions: { select: { permission: { select: { code: true } } } },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      return next(new UnauthorizedError('User no longer exists'));
+    }
+
+    req.user = {
+      id: user.id,
+      permissions: user.userRoles.flatMap(({ role }) =>
+        role.permissions.map(({ permission }) => permission.code)
+      ),
+    };
     next();
   } catch (err) {
     return next(new UnauthorizedError('Invalid or expired token'));
   }
 }
 
-function requireRole(...allowedRoles) {
+function requirePermission(...requiredPermissions) {
   return (req, res, next) => {
     if (!req.user) {
       return next(new UnauthorizedError('Authentication required'));
     }
-    if (!allowedRoles.includes(req.user.role)) {
-      return next(new ForbiddenError(`You can't be here , don't have the allowed role`));
+    const hasAllPermissions = requiredPermissions.every((permission) =>
+      req.user.permissions.includes(permission)
+    );
+    if (!hasAllPermissions) {
+      return next(new ForbiddenError('You do not have the required permission'));
     }
     next();
   };
 }
 
-module.exports = { authenticate, requireRole };
+function hasPermission(user, permission) {
+  return user.permissions.includes(permission);
+}
+
+module.exports = { authenticate, requirePermission, hasPermission };

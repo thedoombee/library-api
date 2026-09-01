@@ -5,7 +5,7 @@ async function createBook(req, res, next) {
         const book = await bookService.createBook(req.body);
         res.status(201).json(book);
     } catch (error) {
-        next(err);
+        next(error);
     }
 }
 
@@ -14,7 +14,7 @@ async function getBook(req, res, next) {
         const book = await bookService.getBook(req.params.id);
         res.status(200).json(book);
     } catch (error) {
-        next(err);
+        next(error);
     }
 }
 
@@ -31,7 +31,7 @@ async function deleteBook(req, res, next) {
         await bookService.deleteBook(req.params.id);
         res.status(204).send();
     } catch (error) {
-        next(err);
+        next(error);
     }
 }
 

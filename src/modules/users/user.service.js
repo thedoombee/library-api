@@ -38,7 +38,7 @@ async function login({ email, password }) {
 
 function generateToken(user) {
   return jwt.sign(
-    { sub: user.id, role: user.role }, 
+    { sub: user.id },
     env.JWT_SECRET,
     { expiresIn: env.TOKEN_EXPIRATION }
   );

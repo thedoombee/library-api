@@ -1,9 +1,29 @@
 const prisma = require('../../config/database');
 
-async function create({ email, passwordHash, name, role = 'MEMBER' }) {
+async function create({ email, passwordHash, name }) {
+  const defaultRole = await prisma.role.findFirst({
+    where: { isDefault: true },
+    select: { id: true },
+  });
+
+  if (!defaultRole) {
+    throw new Error('No default role is configured');
+  }
+
   return prisma.user.create({
-    data: { email, passwordHash, name, role },
-    select: { id: true, email: true, name: true, role: true, createdAt: true }, 
+    data: {
+      email,
+      passwordHash,
+      name,
+      userRoles: { create: { roleId: defaultRole.id } },
+    },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      createdAt: true,
+      userRoles: { select: { role: { select: { name: true } } } },
+    },
   });
 }
 
@@ -14,7 +34,13 @@ async function findByEmail(email) {
 async function findById(id) {
   return prisma.user.findUnique({
     where: { id },
-    select: { id: true, email: true, name: true, role: true, createdAt: true },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      createdAt: true,
+      userRoles: { select: { role: { select: { name: true } } } },
+    },
   });
 }
 

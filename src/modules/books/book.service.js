@@ -26,4 +26,4 @@ async function deleteBook(id) {
     return bookRepository.remove(id);
 }
 
-module.exports = { createBook, getBook, listBooks };
+module.exports = { createBook, getBook, listBooks, deleteBook };
