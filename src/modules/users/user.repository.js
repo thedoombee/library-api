@@ -39,7 +39,8 @@ async function findById(id) {
       email: true,
       name: true,
       createdAt: true,
-      userRoles: { select: { role: { select: { name: true } } } },
+      userRoles: { select: 
+        { role: { select: { name: true } } } },
     },
   });
 }
