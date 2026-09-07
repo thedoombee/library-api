@@ -35,4 +35,13 @@ async function deleteBook(req, res, next) {
     }
 }
 
-module.exports = { createBook, getBook, listBooks, deleteBook }
+async function updateBook(req, res, next) {
+    try {
+        const book = await bookService.updateBook(req.params.id, req.body);
+        res.status(200).json(book);
+    } catch (error) {
+        next(error);
+    }
+}
+
+module.exports = { createBook, getBook, listBooks, updateBook, deleteBook };

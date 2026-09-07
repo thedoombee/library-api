@@ -27,6 +27,7 @@ async function main() {
     ['authors:update', 'Update authors'],
     ['authors:delete', 'Delete authors'],
     ['books:create', 'Create books'],
+    ['books:update', 'Update books'],
     ['books:delete', 'Delete books'],
     ['loans:create', 'Create a loan'],
     ['loans:read:own', 'Read own loans'],

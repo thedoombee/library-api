@@ -47,4 +47,22 @@ async function remove(id) {
     })
 }
 
-module.exports = { create, findById, findMany, remove};
+async function update(id, { authorIds, ...data }) {
+  return prisma.book.update({
+    where: { id },
+    data: {
+      ...data,
+      ...(authorIds
+        ? {
+            authors: {
+              deleteMany: {},
+              create: authorIds.map((authorId) => ({ authorId })),
+            },
+          }
+        : {}),
+    },
+    include: { authors: { include: { author: true } } },
+  });
+}
+
+module.exports = { create, findById, findMany, remove, update};

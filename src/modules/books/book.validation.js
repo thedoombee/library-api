@@ -33,4 +33,15 @@ const listBooksSchema = z
   })
   .strict();
 
-module.exports = { createBookSchema, listBooksSchema };
+  const updateBookSchema = z.object({
+  params: z.object({ id: z.string().uuid() }),
+  body: z.object({
+    title: z.string().min(1).max(300).optional(),
+    isbn: z.string().min(10).max(20).optional(),
+    publishedYear: z.coerce.number().int().min(1000).max(new Date().getFullYear()).optional(),
+    totalCopies: z.coerce.number().int().min(1).optional(),
+    authorIds: z.array(z.string().uuid()).min(1).optional(),
+  }).strict(),
+});
+
+module.exports = { createBookSchema, listBooksSchema, updateBookSchema };
