@@ -27,10 +27,11 @@ async function returnLoan({ loanId, requestingUser }) {
   const loan = await loanRepository.findById(loanId);
   if (!loan) throw new NotFoundError('Loan not found');
 
-  const canReturnAnyLoan = hasPermission(requestingUser, 'loans:return:any');
-  const canReturnOwnLoan = hasPermission(requestingUser, 'loans:return:own');
-  const canReturnLoan = canReturnAnyLoan || (loan.userId === requestingUser.id && canReturnOwnLoan);
-  if (!canReturnLoan) {
+  const isLibrarian = requestingUser?.role === 'LIBRARIAN';
+  const canReturnAnyLoan = hasPermission(requestingUser, 'loans:return:any') || isLibrarian;
+  const isOwner = loan.userId === requestingUser.id;
+
+  if (!canReturnAnyLoan && !isOwner) {
     throw new ForbiddenError('You cannot return a loan that is not yours');
   }
 

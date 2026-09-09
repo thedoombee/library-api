@@ -52,7 +52,7 @@ describe('loanService.returnLoan', () => {
 
   it('throws NotFoundError if the loan does not exist', async () => {
     loanRepository.findById.mockResolvedValue(null);
-    await expect(loanService.returnLoan({ loanId: 'l1', requestingUser: { id: 'u1', role: 'MEMBER' } }))
+    await expect(loanService.returnLoan({ loanId: 'l1', requestingUser: { id: 'u1', role: 'MEMBER', permissions: [] } }))
       .rejects.toThrow(NotFoundError);
   });
 

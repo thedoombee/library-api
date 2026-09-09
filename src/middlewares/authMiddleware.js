@@ -66,7 +66,7 @@ function requirePermission(...requiredPermissions) {
 }
 
 function hasPermission(user, permission) {
-  return user.permissions.includes(permission);
+  return user?.permissions?.includes(permission) ?? false;
 }
 
 module.exports = { authenticate, requirePermission, hasPermission };
