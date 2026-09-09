@@ -47,6 +47,22 @@ describe('loanService.createLoan', () => {
   });
 });
 
+describe('loanService.listLoans', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('normalizes string limits before querying the repository', async () => {
+    const requestingUser = { id: 'u1', role: 'MEMBER', permissions: ['loans:read:own'] };
+    loanRepository.AllUserLoans.mockResolvedValue({ items: [], nextCursor: null });
+
+    await loanService.listLoans(requestingUser, { cursor: null, limit: '25' });
+
+    expect(loanRepository.AllUserLoans).toHaveBeenCalledWith('u1', {
+      cursor: null,
+      limit: 25,
+    });
+  });
+});
+
 describe('loanService.returnLoan', () => {
   beforeEach(() => jest.clearAllMocks());
 

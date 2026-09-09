@@ -43,13 +43,15 @@ async function returnLoan({ loanId, requestingUser }) {
 }
 
 async function listLoans(requestingUser, { cursor, limit }) {
+  const normalizedLimit = Number(limit ?? 20);
+
   if (hasPermission(requestingUser, 'loans:read:any')) {
-    return loanRepository.AllLoans({ cursor, limit });
+    return loanRepository.AllLoans({ cursor, limit: normalizedLimit });
   }
   if (!hasPermission(requestingUser, 'loans:read:own')) {
     throw new ForbiddenError('You do not have the required permission');
   }
-  return loanRepository.AllUserLoans(requestingUser.id, { cursor, limit });
+  return loanRepository.AllUserLoans(requestingUser.id, { cursor, limit: normalizedLimit });
 }
 
 module.exports = { createLoan, returnLoan, listLoans };

@@ -30,26 +30,28 @@ async function ActiveUserLoans(userId) {
 }
 
 async function AllUserLoans(userId, { cursor, limit = 20 }) {
+  const normalizedLimit = Number(limit ?? 20);
   const loans = await prisma.loan.findMany({
     where: { userId },
-    take: limit + 1,
+    take: normalizedLimit + 1,
     ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
     orderBy: { borrowedAt: 'desc' },
     include: { book: true },
   });
-  const hasNextPage = loans.length > limit;
+  const hasNextPage = loans.length > normalizedLimit;
   const items = hasNextPage ? loans.slice(0, -1) : loans;
   return { items, nextCursor: hasNextPage ? items[items.length - 1].id : null };
 }
 
 async function AllLoans({ cursor, limit = 20 }) {
+  const normalizedLimit = Number(limit ?? 20);
   const loans = await prisma.loan.findMany({
-    take: limit + 1,
+    take: normalizedLimit + 1,
     ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
     orderBy: { borrowedAt: 'desc' },
     include: { book: true, user: { select: { id: true, name: true, email: true } } },
   });
-  const hasNextPage = loans.length > limit;
+  const hasNextPage = loans.length > normalizedLimit;
   const items = hasNextPage ? loans.slice(0, -1) : loans;
   return { items, nextCursor: hasNextPage ? items[items.length - 1].id : null };
 }
