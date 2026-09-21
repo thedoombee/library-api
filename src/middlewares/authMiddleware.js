@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const env = require("../config/env");
 const prisma = require("../config/database");
 const { UnauthorizedError, ForbiddenError } = require("../errors");
+const { hasPermission } = require('../shared/permissionUtils');
+
 
 async function authenticate(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -65,8 +67,6 @@ function requirePermission(...requiredPermissions) {
   };
 }
 
-function hasPermission(user, permission) {
-  return user?.permissions?.includes(permission) ?? false;
-}
+
 
 module.exports = { authenticate, requirePermission, hasPermission };

@@ -1,7 +1,7 @@
 const loanRepository = require('./loan.repository');
 const bookRepository = require('../books/book.repository');
 const { NotFoundError, ConflictError, ForbiddenError } = require('../../errors');
-const { hasPermission } = require('../../middlewares/authMiddleware');
+const { hasPermission } = require('../../shared/permissionUtils');
 
 const MAX_ACTIVE_LOANS_PER_USER = 3;
 const LOAN_DURATION_DAYS = 14;
@@ -27,12 +27,13 @@ async function returnLoan({ loanId, requestingUser }) {
   const loan = await loanRepository.findById(loanId);
   if (!loan) throw new NotFoundError('Loan not found');
 
-  const isLibrarian = requestingUser?.role === 'LIBRARIAN';
-  const canReturnAnyLoan = hasPermission(requestingUser, 'loans:return:any') || isLibrarian;
   const isOwner = loan.userId === requestingUser.id;
+  const canReturnAny = hasPermission(requestingUser, 'loans:return:any');
+  const canReturnOwn = hasPermission(requestingUser, 'loans:return:own');
 
-  if (!canReturnAnyLoan && !isOwner) {
-    throw new ForbiddenError('You cannot return a loan that is not yours');
+  const isAllowed = canReturnAny || (isOwner && canReturnOwn);
+  if (!isAllowed) {
+    throw new ForbiddenError('You do not have permission to return this loan');
   }
 
   if (loan.returnedAt) {
