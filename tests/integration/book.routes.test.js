@@ -1,4 +1,12 @@
+const { resetTestDatabase, seedTestData } = require('../helpers/db');
+
 describe('Books routes — authorization', () => {
+  let memberToken, librarianToken, author;
+  beforeEach(async () => {
+    await resetTestDatabase();
+    ({ memberToken, librarianToken, author } = await seedTestData());
+  });
+  
   it('POST /books returns 403 for a MEMBER', async () => {
     const res = await request(app)
       .post('/books')
