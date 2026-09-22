@@ -87,5 +87,7 @@ router.post('/register', validate(registerSchema), controller.register);
  *         description: Internal server error
  */
 router.post('/login', validate(loginSchema), controller.login);
+router.post('/refresh', controller.refresh);
+router.post('/logout', controller.logout);
 
 module.exports = router;

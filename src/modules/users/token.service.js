@@ -47,10 +47,39 @@ async function issueTokenPair(user, { ip } = {}) {
     refreshToken,
   };
 }
+async function rotateRefreshToken(rawToken, { ip } = {}) {
+  if (!rawToken) throw new UnauthorizedError('Missing refresh token');
+
+  const tokenHash = hashToken(rawToken);
+  const stored = await refreshTokenRepository.findByTokenHash(tokenHash);
+
+  if (!stored) throw new UnauthorizedError('Invalid refresh token');
+
+  if (stored.revokedAt) {
+    await refreshTokenRepository.revokeAllForUser(stored.userId);
+    console.error(`SECURITY: refresh token reuse detected — user=${stored.userId} ip=${ip}`);
+    throw new UnauthorizedError('Refresh token revoked due to suspected reuse. Please log in again.');
+  }
+
+  if (stored.expiresAt < new Date()) {
+    throw new UnauthorizedError('Refresh token expired');
+  }
+
+  const user = await userRepository.findById(stored.userId);
+  if (!user) throw new UnauthorizedError('User no longer exists');
+
+  const newAccessToken = generateAccessToken(user);
+  const newRawRefreshToken = await generateRefreshToken(user, { ip });
+  const newStored = await refreshTokenRepository.findByTokenHash(hashToken(newRawRefreshToken));
+  await refreshTokenRepository.revoke(stored.id, { replacedByToken: newStored.id });
+
+  return { accessToken: newAccessToken, refreshToken: newRawRefreshToken };
+}
 
 module.exports = {
   generateAccessToken,
   generateRefreshToken,
   hashToken,
   issueTokenPair,
+  rotateRefreshToken,
 };

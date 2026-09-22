@@ -4,6 +4,7 @@ const userRepository = require('./user.repository');
 const { ConflictError, UnauthorizedError } = require('../../errors');
 const env = require('../../config/env');
 const SALT_ROUNDS = 10;
+const tokenService = require('./token.service.js')
 
 
 async function register({ email, password, name }) {
@@ -15,8 +16,8 @@ async function register({ email, password, name }) {
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   const user = await userRepository.create({ email, passwordHash, name });
 
-  const token = generateToken(user);
-  return { user, token };
+  const tokens = await tokenService.issueTokenPair(user, { ip });
+  return { user, ...tokens };
 }
 
 async function login({ email, password }) {
@@ -31,17 +32,17 @@ async function login({ email, password }) {
     throw new UnauthorizedError('Invalid email or password');
   }
 
-  const token = generateToken(user);
+  const tokens = await tokenService.issueTokenPair(user, { ip });
   const { passwordHash, ...safeUser } = user; 
-  return { user: safeUser, token };
+  return { user: safeUser, ...token };
 }
 
-function generateToken(user) {
-  return jwt.sign(
-    { sub: user.id },
-    env.JWT_SECRET,
-    { expiresIn: env.TOKEN_EXPIRATION }
-  );
+async function logout(rawRefreshToken) {
+  if (!rawRefreshToken) return;
+  const stored = await refreshTokenRepository.findByTokenHash(tokenService.hashToken(rawRefreshToken));
+  if (stored && !stored.revokedAt) {
+    await refreshTokenRepository.revoke(stored.id);
+  }
 }
 
 module.exports = { register, login };

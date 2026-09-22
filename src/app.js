@@ -9,17 +9,15 @@ const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./config/swagger');
+const cookieParser = require('cookie-parser');
 
 
 
 const app = express();
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
+app.use(cookieParser());
 app.use(express.json()); 
-
 app.use(helmet());
-
 app.use(cors({
   origin: process.env.CORS_ORIGIN?.split(',') || '*',
 }));
@@ -41,6 +39,7 @@ const apiLimiter = rateLimit({
   message: { status: 'error', message: 'Too many requests, please try again later' },
 });
 
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(apiLimiter);
 app.use('/users/login', authLimiter);
 app.use('/users/register', authLimiter);
