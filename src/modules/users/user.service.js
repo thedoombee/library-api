@@ -17,7 +17,8 @@ async function register({ email, password, name }) {
   const user = await userRepository.create({ email, passwordHash, name });
 
   const tokens = await tokenService.issueTokenPair(user, { ip });
-  return { user, ...tokens };
+  const { passwordHash, ...safeUser } = user;
+  return { user: safeUser, ...tokens };
 }
 
 async function login({ email, password }) {
